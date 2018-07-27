@@ -13,27 +13,30 @@ from pandas import read_csv
 ##########################
 #HARDCODES
 save_dir='/home/zdong/xiaoxu/emolt/figure/'#the path of saving figure
-file_catch='sqldump_2018_07_BN.csv' # catch data
+file_catch='sqldump_2018_07_BN.csv' # catch data that JiM created &  emailed
 input_dir='/home/zdong/xiaoxu/emolt/files/'
 file_temp='this2.dat'  #temp data
+colnum=11 # column number where "11' refers to lobster "kept"
 ##########################
-df_catch=read_csv(input_dir+file_catch)
-catch=df_catch.icol(11)#catch number
+df_catch=read_csv(input_dir+file_catch) # reads catch data
+catch=df_catch.icol(colnum)# catch number
+date=df_catch.icol(5)#2000-09-15:08:43
 variables=['year','year_day','temp','lat','lon','depth']
-df_temp=pd.read_csv(input_dir+file_temp, names=variables, sep='\s+')
+df_temp=pd.read_csv(input_dir+file_temp, names=variables, sep='\s+') # read temperature time series
 temp=df_temp["temp"]
 tyear=df_temp["year"]
-styear=sorted(set(tyear))
-tyear_d=df_temp["year_day"]
-date=df_catch.icol(5)#2000-09-15:08:43               
+tyear_d=df_temp["year_day"]            
+
+#################
+#change catch datetime to year_day
 cyear_d=[]
-#################
-#change datetime to year_day
 for i in range(0,len(date)):
-     day=datetime.datetime.strptime(date[1],"%Y-%m-%d:%H:%M").timetuple().tm_yday
+     day=datetime.datetime.strptime(date[i],"%Y-%m-%d:%H:%M").timetuple().tm_yday  # gets yearday
      cyear_d.append(day)     
-mean_temp=[]
+
 #################
+# create mean temp 
+mean_temp=[]
 for s in range(0,len(catch)):
         print s
         Temp=[]
@@ -41,7 +44,7 @@ for s in range(0,len(catch)):
            if int(date[s][0:4])==tyear[i] and cyear_d[s]==int(tyear_d[i]):
                #match year and year_day
                Temp.append(temp[i])
-        mean_temp.append(np.mean(Temp))#creat mean temperature 
+        mean_temp.append(np.mean(Temp))#creates mean temperature on the day he hauled
 ####################
 aver_temp=[]
 for i in range(len(mean_temp)-1):
