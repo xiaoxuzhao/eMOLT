@@ -18,11 +18,11 @@ file_catch='sqldump_2018_07_BN.csv' # catch data that JiM created &  emailed
 input_dir='/home/zdong/xiaoxu/emolt/files/'
 file_temp='this2.dat'  #temp data
 catch_colnum=11 # column number where "11' refers to lobster "kept"
-date_colnum=5#column number where "11' refers to lobster "kept"
-run_average=5
+date_colnum=5#column number where "5" refers to date column
+run_average=5 #number of samples to perform a running average over
 #########################
 #the functoin of mean average
-def runningMean(x, N):
+def runningMean(x, N): # where did this come from?  What is your reference?
     y = np.zeros((len(x),))
     for ctr in range(len(x)):
          y[ctr] = np.sum(x[ctr:(ctr+N)])
@@ -31,7 +31,7 @@ def runningMean(x, N):
 df_catch=read_csv(input_dir+file_catch) # reads catch data
 catch=df_catch.icol(catch_colnum)# catch number
 date=df_catch.icol(date_colnum)#2000-09-15:08:43
-variables=['year','year_day','temp','lat','lon','depth']#
+variables=['year','year_day','temp','lat','lon','depth']# columns in the temp time series
 df_temp=pd.read_csv(input_dir+file_temp, names=variables, sep='\s+') # read temperature time series
 temp=df_temp["temp"]
 tyear=df_temp["year"]
@@ -46,6 +46,7 @@ for i in range(0,len(date)):
 #################
 # create mean temp 
 mean_temp,std_temp,Temp=[],[],[]
+# the following for loop appears to calculate mean temperature on just the first day of catch dataset 
 s=0
 for i in range(len(temp)):
            if int(date[s][0:4])==tyear[i] and cyear_d[s]==round(tyear_d[i],4):
@@ -57,14 +58,16 @@ for s in range(1,len(catch)-1):
         print s
         Temp=[]
         for i in range(len(temp)):
-           max_t=max(cyear_d[s],cyear_d[s+1])
+           max_t=max(cyear_d[s],cyear_d[s+1])# why call this "max_t" and not "max_yd"
            min_t=min(cyear_d[s+1],cyear_d[s])
-           if int(date[s][0:4])==tyear[i] and min_t<=round(tyear_d[i],4)<=max_t:
+           if int(date[s][0:4])==tyear[i] and min_t<=round(tyear_d[i],4)<=max_t:  # why not just use cyear_d[s] and cyear_d[s+1] 
                #match year and year_day
                Temp.append(temp[i])
-        std_temp.append(np.std(pd.Series(Temp)))
+        std_temp.append(np.std(pd.Series(Temp)))# why not just Temp?
         mean_temp.append(np.mean(Temp))#creates mean temperature on the day he hauled
-s=len(catch)-1
+# the following for loop appears to calculate mean temperature on just the last day of catch dataset 
+# but I'm not sure why it is needed
+s=len(catch)-1 # s is already used as a variable in the for-loop
 Temp=[]
 for i in range(len(temp)):
            if int(date[s][0:4])==tyear[i] and cyear_d[s]==round(tyear_d[i],4):
